@@ -1,5 +1,6 @@
 from PyQt6.QtCore import QThread
 from .signals import ControllerSignals, Button
+from serial.serialutil import SerialException
 
 class ButtonParser:
     DIRECTION_MASK = 0b00100000
@@ -21,6 +22,11 @@ class ResponseReader(QThread):
         self.signals = ControllerSignals()
 
     def run(self):
-        while True:
-            response = int.from_bytes(self.ser.read(1), "little")
-            self.signals.button_pressed.emit(ButtonParser(response).button)
+        while self.ser.is_open:
+            try:
+                response = int.from_bytes(self.ser.read(1), "little")
+                self.signals.button_pressed.emit(ButtonParser(response).button)
+            except TypeError:
+                continue
+            except AttributeError:
+                continue
