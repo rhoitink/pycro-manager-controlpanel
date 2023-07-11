@@ -45,12 +45,13 @@ class MainWindow(QMainWindow):
         self.slider_labels = []
         self.slider_values = []
         self.slider_mappings = [
-            ('RCM', 'Laser 1 Power', 0, 100), # group, prop, min, max
-            ('RCM', 'Laser 2 Power', 0, 100),
-            ('RCM', 'Laser 3 Power', 0, 100),
-            ('RCM', 'Laser 4 Power', 0, 100),
+            ('RCM', 'Laser 1 Power', 0, 100, 1), # group, prop, min, max, step
+            ('RCM', 'Laser 2 Power', 0, 100, 1),
+            ('RCM', 'Laser 3 Power', 0, 100, 1),
+            ('RCM', 'Laser 4 Power', 0, 100, 1),
+            ('PIZStage', 'Position', 0, 100, 0.1),
         ]
-        for i, (group, prop, _, _) in enumerate(self.slider_mappings):
+        for i, (group, prop, *_) in enumerate(self.slider_mappings):
             self.slider_labels.append(QLabel())
             self.slider_labels[-1].setText(prop)
             self.slider_values.append(QLabel())
@@ -84,7 +85,7 @@ class MainWindow(QMainWindow):
             self.bridge = Bridge() ## docs at: https://pycro-manager--372.org.readthedocs.build/en/372/index.html
             self.mmcore = self.bridge.get_core()
             
-            for i, (mmgroup, mmprop, propmin, propmax) in enumerate(self.slider_mappings):
+            for i, (mmgroup, mmprop, propmin, propmax, propstep) in enumerate(self.slider_mappings):
                 self.sliders[i].setMinimum(propmin)
                 self.sliders[i].setMaximum(propmax)
                 self.sliders[i].setValue(int(self.mmcore.get_property(mmgroup, mmprop)))
@@ -112,10 +113,10 @@ class MainWindow(QMainWindow):
 
     def button_parser(self, btn: Button):
         if btn.button - 1 < len(self.slider_mappings):
-            mmgroup, mmprop, propmin, propmax = self.slider_mappings[btn.button - 1]
-            current_value = int(self.mmcore.get_property(mmgroup, mmprop))
-            new_value = int(np.clip(current_value + btn.direction, propmin, propmax))
-            self.sliders[btn.button-1].setValue(new_value)
-            self.mmcore.set_property(mmgroup, mmprop, new_value)
+            mmgroup, mmprop, propmin, propmax, propstep = self.slider_mappings[btn.button - 1]
+            current_value = float(self.mmcore.get_property(mmgroup, mmprop))
+            new_value = np.clip(current_value + btn.direction*propstep, propmin, propmax)
+            self.sliders[btn.button-1].setValue(int(new_value))
+            self.mmcore.set_property(mmgroup, mmprop, float(new_value))
             print(mmprop, new_value)
 
