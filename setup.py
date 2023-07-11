@@ -15,7 +15,8 @@ setup(
     install_requires=[
         "pyserial",
         "pyqt6",
-        "pycromanager"
+        "pycromanager==0.15.0",
+        "numpy==1.22.1",
     ],
     extras_require={
         "dev": [
