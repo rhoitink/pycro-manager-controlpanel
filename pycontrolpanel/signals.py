@@ -1,5 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 
+
 class Button:
     CW = 1
     CCW = -1
@@ -8,6 +9,7 @@ class Button:
         self.direction = direction
         self.button = button
 
+
 class ControllerSignals(QObject):
     """Class for handling Qt Signals that can be used during measurement.
     Singleton instance.
@@ -15,4 +17,3 @@ class ControllerSignals(QObject):
 
     _instance = None
     button_pressed = pyqtSignal(Button)
-
